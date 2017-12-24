@@ -1,0 +1,101 @@
+﻿@model IEnumerable<Blogpost1.Models.AddPost>
+
+@{
+    ViewBag.Title = "Index";
+}
+
+<h2>Index</h2>
+
+<p>
+    @Html.ActionLink("Create New", "Create")
+</p>
+
+<select id="category" class="form-control"></select>
+<p id="proba"></p>
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                Category
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.UserAccount.Username)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Title)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Description)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Datum)
+            </th>
+            <th></th>
+        </tr>
+        </thead>
+    <tbody>
+        @foreach (var item in Model)
+    {
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.Category.Name)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.UserAccount.Username)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Title)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Description)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Datum)
+            </td>
+            <td>
+                @Html.ActionLink("Edit", "Edit", new { id = item.PostID }) |
+                @Html.ActionLink("Details", "Details", new { id = item.PostID }) |
+                @Html.ActionLink("Delete", "Delete", new { id = item.PostID })
+            </td>
+        </tr>
+}
+    </thead>
+</table>
+<script src="http://ajax.aspnetcdn.com/ajax/jQuery/jquery-2.0.3.min.js"></script>
+<script>
+    var uri = '../api/viewposts';
+
+    $(document).ready(function () {
+      $.getJSON(uri)
+          .done(function (data) {
+             $.each(data, function (key, item) {
+                $('#category')
+                    .append($("<option></option>")
+                        .attr("value", item.CategoryID)
+                        .text(item.Name));
+            });
+          });
+
+    });
+
+    $(document).on('change', "#category", function() {
+        $(".table > tbody").html("");
+        var id = $('#category').val();
+        $.getJSON(uri + '/' + id)
+            .done(function (data) {
+                $.each(data.Result, function (key, item) {
+                    $('.table > tbody:last-child').append('<tr><td>' + item.Category.Name +
+                        '</td><td>' + item.UserAccount.Username +
+                        '</td><td>' + item.Title +
+                        '</td><td>' + item.Description +
+                        '</td><td>' + new Date(item.Datum).toLocaleString("en-US") +
+                        '</td><td>' + '<a href="edit/' + item.PostID + '">Edit</a> | <a href="Details/' + item.PostID + '">Details</a> | <a href="Delete/' + item.PostID +'">Delete</a>' +
+                        '</td></tr>');
+                });
+            })
+            .fail(function (jqXHR, textStatus, err) {
+                $('#proba').text('Error: ' + err);
+            });
+    });
+
+</script>
